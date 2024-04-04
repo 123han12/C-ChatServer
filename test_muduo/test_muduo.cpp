@@ -1,35 +1,35 @@
 #include <muduo/net/TcpServer.h>
 #include <muduo/base/Logging.h>
-#include <boost/bind/bind.hpp> 
+#include <boost/bind/bind.hpp>
 #include <muduo/net/EventLoop.h>
 
 // 使用muduo开发回显服务器
 class EchoServer
 {
- public:
-  EchoServer(muduo::net::EventLoop* loop,
-             const muduo::net::InetAddress& listenAddr);
+public:
+  EchoServer(muduo::net::EventLoop *loop,
+             const muduo::net::InetAddress &listenAddr);
 
-  void start(); 
+  void start();
 
- private:
-  void onConnection(const muduo::net::TcpConnectionPtr& conn);
+private:
+  void onConnection(const muduo::net::TcpConnectionPtr &conn);
 
-  void onMessage(const muduo::net::TcpConnectionPtr& conn,
-                 muduo::net::Buffer* buf,
+  void onMessage(const muduo::net::TcpConnectionPtr &conn,
+                 muduo::net::Buffer *buf,
                  muduo::Timestamp time);
 
   muduo::net::TcpServer server_;
 };
 
-EchoServer::EchoServer(muduo::net::EventLoop* loop,
-                       const muduo::net::InetAddress& listenAddr)
-  : server_(loop, listenAddr, "EchoServer")
+EchoServer::EchoServer(muduo::net::EventLoop *loop,
+                       const muduo::net::InetAddress &listenAddr)
+    : server_(loop, listenAddr, "EchoServer")
 {
   server_.setConnectionCallback(
       boost::bind(&EchoServer::onConnection, this, boost::placeholders::_1));
   server_.setMessageCallback(
-      boost::bind(&EchoServer::onMessage, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3)); 
+      boost::bind(&EchoServer::onMessage, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
 }
 
 void EchoServer::start()
@@ -37,15 +37,15 @@ void EchoServer::start()
   server_.start();
 }
 
-void EchoServer::onConnection(const muduo::net::TcpConnectionPtr& conn)
+void EchoServer::onConnection(const muduo::net::TcpConnectionPtr &conn)
 {
   LOG_INFO << "EchoServer - " << conn->peerAddress().toIpPort() << " -> "
            << conn->localAddress().toIpPort() << " is "
            << (conn->connected() ? "UP" : "DOWN");
 }
 
-void EchoServer::onMessage(const muduo::net::TcpConnectionPtr& conn,
-                           muduo::net::Buffer* buf,
+void EchoServer::onMessage(const muduo::net::TcpConnectionPtr &conn,
+                           muduo::net::Buffer *buf,
                            muduo::Timestamp time)
 {
   // 接收到所有的消息，然后回显
@@ -54,7 +54,6 @@ void EchoServer::onMessage(const muduo::net::TcpConnectionPtr& conn,
            << "data received at " << time.toString();
   conn->send(msg);
 }
-
 
 int main()
 {

@@ -1,6 +1,5 @@
 #include "json.hpp"
 using json = nlohmann::json;
-
 #include <iostream>
 #include <vector>
 #include <map>
@@ -33,7 +32,7 @@ string func2()
     // 上面等同于下面这句一次性添加数组对象
     js["msg"] = {{"zhangsan", "helloworld"}, {"liushuo", "hellochina"}};
     return js.dump() ; 
-}
+}   
 
 // json序列化示例代码三, 序列化容器
 void  func3()
@@ -57,19 +56,16 @@ void  func3()
 }
 
 
-
 int main()
 {
     string recvBuf = func2() ; 
-
+ 
     json buf = json::parse(recvBuf) ;   // 对字符流进行反序列化 
 
     cout << buf["id"] << endl ; 
     auto arr = buf["id"] ; 
     for(auto& p : arr ) cout << p << ' ' ; 
-
     cout << arr[2] << endl ;  
-
 
     return 0;
 }
