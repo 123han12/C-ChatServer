@@ -3,7 +3,6 @@
 #include <mysql/mysql.h>
 #include <string>
 
-
 class MySQL {
 public:
     MySQL() ; 
@@ -18,6 +17,7 @@ public:
 
 private:
     MYSQL* _conn ; 
+
 } ; 
 
 
