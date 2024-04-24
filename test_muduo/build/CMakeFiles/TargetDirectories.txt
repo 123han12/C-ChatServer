@@ -1,3 +1,0 @@
-/home/hsa/C++ChatServer/CppChatServer/test_muduo/build/CMakeFiles/server.dir
-/home/hsa/C++ChatServer/CppChatServer/test_muduo/build/CMakeFiles/edit_cache.dir
-/home/hsa/C++ChatServer/CppChatServer/test_muduo/build/CMakeFiles/rebuild_cache.dir

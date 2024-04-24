@@ -1,0 +1,22 @@
+[
+{
+  "directory": "/home/hsa/C++ChatServer/CppChatServer/build/src/server",
+  "command": "/usr/bin/g++  -I/home/hsa/C++ChatServer/CppChatServer/include -I/home/hsa/C++ChatServer/CppChatServer/include/server -I/home/hsa/C++ChatServer/CppChatServer/include/server/db -I/home/hsa/C++ChatServer/CppChatServer/thirdparty -g -g -o CMakeFiles/ChatServer.dir/chatserver.cpp.o -c /home/hsa/C++ChatServer/CppChatServer/src/server/chatserver.cpp",
+  "file": "/home/hsa/C++ChatServer/CppChatServer/src/server/chatserver.cpp"
+},
+{
+  "directory": "/home/hsa/C++ChatServer/CppChatServer/build/src/server",
+  "command": "/usr/bin/g++  -I/home/hsa/C++ChatServer/CppChatServer/include -I/home/hsa/C++ChatServer/CppChatServer/include/server -I/home/hsa/C++ChatServer/CppChatServer/include/server/db -I/home/hsa/C++ChatServer/CppChatServer/thirdparty -g -g -o CMakeFiles/ChatServer.dir/chatservice.cpp.o -c /home/hsa/C++ChatServer/CppChatServer/src/server/chatservice.cpp",
+  "file": "/home/hsa/C++ChatServer/CppChatServer/src/server/chatservice.cpp"
+},
+{
+  "directory": "/home/hsa/C++ChatServer/CppChatServer/build/src/server",
+  "command": "/usr/bin/g++  -I/home/hsa/C++ChatServer/CppChatServer/include -I/home/hsa/C++ChatServer/CppChatServer/include/server -I/home/hsa/C++ChatServer/CppChatServer/include/server/db -I/home/hsa/C++ChatServer/CppChatServer/thirdparty -g -g -o CMakeFiles/ChatServer.dir/main.cpp.o -c /home/hsa/C++ChatServer/CppChatServer/src/server/main.cpp",
+  "file": "/home/hsa/C++ChatServer/CppChatServer/src/server/main.cpp"
+},
+{
+  "directory": "/home/hsa/C++ChatServer/CppChatServer/build/src/server",
+  "command": "/usr/bin/g++  -I/home/hsa/C++ChatServer/CppChatServer/include -I/home/hsa/C++ChatServer/CppChatServer/include/server -I/home/hsa/C++ChatServer/CppChatServer/include/server/db -I/home/hsa/C++ChatServer/CppChatServer/thirdparty -g -g -o CMakeFiles/ChatServer.dir/db/db.cpp.o -c /home/hsa/C++ChatServer/CppChatServer/src/server/db/db.cpp",
+  "file": "/home/hsa/C++ChatServer/CppChatServer/src/server/db/db.cpp"
+}
+]
