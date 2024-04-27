@@ -1,7 +1,0 @@
-/home/hsa/C++ChatServer/CppChatServer/build/CMakeFiles/edit_cache.dir
-/home/hsa/C++ChatServer/CppChatServer/build/CMakeFiles/rebuild_cache.dir
-/home/hsa/C++ChatServer/CppChatServer/build/src/CMakeFiles/edit_cache.dir
-/home/hsa/C++ChatServer/CppChatServer/build/src/CMakeFiles/rebuild_cache.dir
-/home/hsa/C++ChatServer/CppChatServer/build/src/server/CMakeFiles/ChatServer.dir
-/home/hsa/C++ChatServer/CppChatServer/build/src/server/CMakeFiles/edit_cache.dir
-/home/hsa/C++ChatServer/CppChatServer/build/src/server/CMakeFiles/rebuild_cache.dir
