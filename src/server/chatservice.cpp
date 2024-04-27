@@ -24,9 +24,32 @@ ChatService::ChatService() {
 
 // 处理登录业务
 void ChatService::login(const TcpConnectionPtr& conn , json& js , Timestamp time ){
-    LOG_INFO << "do login service!!!!" ; 
-
-
+    int id = js["id"] ; 
+    std::string pwd = js["password"] ; 
+    User user = _userModel.query(id) ; 
+    if(user.getId() != -1 && user.getPwd() == pwd ) { // 存在用户信息
+        if(user.getState() == std::string( "online") ) {   // 如果此时状态已经是 online 则错误
+            json response ; 
+            response["msgid"] = LOGIN_MSG_ACk ; 
+            response["error"] = -1 ; 
+            response["errmsg"] = "user aleary online , please attempt next time" ; 
+            conn->send(response.dump()) ; 
+        }else {
+            
+            _userModel.updateState(user) ;  // 更新这个用户的状态 
+            json response ; 
+            response["msgid"] = LOGIN_MSG_ACk ; 
+            response["error"] = 0 ; 
+            response["errmsg"] = "login sucess!" ; 
+            conn->send(response.dump()) ; 
+        }
+    } else {  // 不存在用户信息
+        json response ; 
+        response["msgid"] = LOGIN_MSG_ACk ; 
+        response["error"] = -1 ; 
+        response["errmsg"] = "user not exists" ; 
+        conn->send(response.dump()) ;
+    }
 } 
 
 
@@ -42,7 +65,7 @@ void ChatService::Register(const TcpConnectionPtr& conn , json& js , Timestamp t
     user.setPwd(password) ; 
 
     UserModel model ; 
-    bool state  = model.insert(user) ; 
+    bool state  = _userModel.insert(user) ;  
     
     if(state ) {    // 注册成功  
         json response ; 

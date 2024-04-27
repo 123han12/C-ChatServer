@@ -45,8 +45,9 @@ private:
     
     
     // 存储消息id和其对应的业务处理方法
-    unordered_map<int , MsgHandler> _msgHandlerMap ; //消息id对应的业务处理函数
-
+    unordered_map<int , MsgHandler> _msgHandlerMap ; 
+    
+    UserModel _userModel ; 
 
 } ; 
 

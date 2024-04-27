@@ -16,4 +16,11 @@ int main(int argc , char** argv ) {
 
 /*
 {"msgid":2,"name":"masplove","password":"123456"}
+
+{"msgid":1,"id":22,"password":"123456"}
+
+错误测试
+{"msgid":1,"id":10086,"password":"123456"}
+
+
 */
