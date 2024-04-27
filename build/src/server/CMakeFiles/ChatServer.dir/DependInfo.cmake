@@ -12,6 +12,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/hsa/C++ChatServer/CppChatServer/src/server/chatservice.cpp" "src/server/CMakeFiles/ChatServer.dir/chatservice.cpp.o" "gcc" "src/server/CMakeFiles/ChatServer.dir/chatservice.cpp.o.d"
   "/home/hsa/C++ChatServer/CppChatServer/src/server/db/db.cpp" "src/server/CMakeFiles/ChatServer.dir/db/db.cpp.o" "gcc" "src/server/CMakeFiles/ChatServer.dir/db/db.cpp.o.d"
   "/home/hsa/C++ChatServer/CppChatServer/src/server/main.cpp" "src/server/CMakeFiles/ChatServer.dir/main.cpp.o" "gcc" "src/server/CMakeFiles/ChatServer.dir/main.cpp.o.d"
+  "/home/hsa/C++ChatServer/CppChatServer/src/server/user.cpp" "src/server/CMakeFiles/ChatServer.dir/user.cpp.o" "gcc" "src/server/CMakeFiles/ChatServer.dir/user.cpp.o.d"
   )
 
 # Targets to which this target links.

@@ -288,4 +288,18 @@ src/server/CMakeFiles/ChatServer.dir/chatservice.cpp.o: \
  /usr/include/c++/11/bits/ostream.tcc \
  /usr/include/c++/11/bits/istream.tcc \
  /home/hsa/C++ChatServer/CppChatServer/include/public.hpp \
- /usr/include/muduo/base/Logging.h /usr/include/muduo/base/LogStream.h
+ /usr/include/muduo/base/Logging.h /usr/include/muduo/base/LogStream.h \
+ /home/hsa/C++ChatServer/CppChatServer/include/server/usermodel.hpp \
+ /home/hsa/C++ChatServer/CppChatServer/include/server/db/db.h \
+ /usr/include/mysql/mysql.h \
+ /usr/lib/gcc/x86_64-linux-gnu/11/include/stdbool.h \
+ /usr/include/mysql/field_types.h /usr/include/mysql/my_list.h \
+ /usr/include/mysql/mysql_com.h /usr/include/mysql/my_command.h \
+ /usr/include/mysql/my_compress.h \
+ /usr/include/mysql/udf_registration_types.h \
+ /usr/include/mysql/client_plugin.h /usr/include/c++/11/stdlib.h \
+ /usr/include/mysql/plugin_auth_common.h \
+ /usr/include/mysql/mysql_version.h /usr/include/mysql/mysql_time.h \
+ /usr/include/mysql/errmsg.h \
+ /home/hsa/C++ChatServer/CppChatServer/include/server/user.hpp \
+ /usr/include/c++/11/iostream

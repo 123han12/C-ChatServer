@@ -226,6 +226,30 @@ main.cpp.s:
 	cd /home/hsa/C++ChatServer/CppChatServer/build && $(MAKE) $(MAKESILENT) -f src/server/CMakeFiles/ChatServer.dir/build.make src/server/CMakeFiles/ChatServer.dir/main.cpp.s
 .PHONY : main.cpp.s
 
+user.o: user.cpp.o
+.PHONY : user.o
+
+# target to build an object file
+user.cpp.o:
+	cd /home/hsa/C++ChatServer/CppChatServer/build && $(MAKE) $(MAKESILENT) -f src/server/CMakeFiles/ChatServer.dir/build.make src/server/CMakeFiles/ChatServer.dir/user.cpp.o
+.PHONY : user.cpp.o
+
+user.i: user.cpp.i
+.PHONY : user.i
+
+# target to preprocess a source file
+user.cpp.i:
+	cd /home/hsa/C++ChatServer/CppChatServer/build && $(MAKE) $(MAKESILENT) -f src/server/CMakeFiles/ChatServer.dir/build.make src/server/CMakeFiles/ChatServer.dir/user.cpp.i
+.PHONY : user.cpp.i
+
+user.s: user.cpp.s
+.PHONY : user.s
+
+# target to generate assembly for a file
+user.cpp.s:
+	cd /home/hsa/C++ChatServer/CppChatServer/build && $(MAKE) $(MAKESILENT) -f src/server/CMakeFiles/ChatServer.dir/build.make src/server/CMakeFiles/ChatServer.dir/user.cpp.s
+.PHONY : user.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -247,6 +271,9 @@ help:
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... user.o"
+	@echo "... user.i"
+	@echo "... user.s"
 .PHONY : help
 
 

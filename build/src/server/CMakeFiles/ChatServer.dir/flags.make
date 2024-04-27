@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/home/hsa/C++ChatServer/CppChatServer/include -I/home/hsa/C++ChatServer/CppChatServer/include/server -I/home/hsa/C++ChatServer/CppChatServer/include/server/db -I/home/hsa/C++ChatServer/CppChatServer/thirdparty
 
-CXX_FLAGS = -g -g
+CXX_FLAGS = -g
 
