@@ -15,6 +15,8 @@ public:
 
     MYSQL_RES* query(std::string sql) ; 
 
+    MYSQL* getConnection() ; 
+
 private:
     MYSQL* _conn ; 
 

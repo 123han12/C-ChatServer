@@ -7,7 +7,8 @@
 #include "json.hpp"
 #include "public.hpp"
 #include <muduo/base/Logging.h>
-
+#include <usermodel.hpp>
+#include <memory>
 
 using namespace std ; 
 using namespace muduo ; 
@@ -16,12 +17,14 @@ using namespace placeholders ;
 using json = nlohmann::json ; 
 
 
+
 // 定义函数对象
 using MsgHandler = std::function<void(const TcpConnectionPtr &conn , json& js , Timestamp ) > ;  
 
 // 给 msgid 映射一个事件处理函数
 // 单例模式设计聊天的服务类
 class ChatService {
+
 
 public:
 
