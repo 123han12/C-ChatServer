@@ -1,2 +1,4 @@
 ./json-learn
 ./test_muduo/build
+./bin
+./build
