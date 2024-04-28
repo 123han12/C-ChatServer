@@ -40,7 +40,7 @@ public:
                 MYSQL_ROW row = mysql_fetch_row(res) ;  // MYSQL_ROW 实际上就是二级指针
                 if(row != nullptr ) {
                     User user ; 
-                    user.setId(atoi(row[0]) ) ; 
+                    user.setId(atoi(row[0]) ) ;  
                     user.setName(row[1]);
                     user.setPwd(row[2]) ; 
                     user.setState(row[3]) ;  
@@ -55,7 +55,8 @@ public:
     bool updateState(User user ) {
         char sql[MAX_SQL_SIZE]  = {'\0'}; 
         int id = user.getId() ; 
-        sprintf(sql , "update user set state = 'online' where id = %d" , id ) ;  
+        std::string state = user.getState() ; 
+        sprintf(sql , "update user set state = '%s' where id = %d" , state.c_str() , id ) ;  
 
         MySQL mysql ; 
         if(mysql.connect() ) { // 连接成功
@@ -66,7 +67,13 @@ public:
         return false ; 
     }
 
-
+    void resetState(){
+        char sql[MAX_SQL_SIZE] = "update user set state = 'offline' where state = 'online' "; 
+        MySQL mysql ; 
+        if(mysql.connect() ) {
+            mysql.update(sql) ; 
+        } 
+    }
 } ; 
 
 

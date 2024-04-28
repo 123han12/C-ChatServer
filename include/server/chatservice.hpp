@@ -6,9 +6,11 @@
 #include <muduo/net/TcpConnection.h>
 #include "json.hpp"
 #include "public.hpp"
+#include "offlinemessagemodel.h"
 #include <muduo/base/Logging.h>
 #include <usermodel.hpp>
 #include <memory>
+#include <mutex>
 
 using namespace std ; 
 using namespace muduo ; 
@@ -37,7 +39,14 @@ public:
     // 处理注册业务
     void Register(const TcpConnectionPtr& conn , json& js , Timestamp time ) ; 
     
+    // 获取对应消息的句柄
     MsgHandler getMsgHandler(int msgid) ; 
+
+    void OneChat(const TcpConnectionPtr& conn , json& js , Timestamp time ) ; 
+
+    void clientCloseException(const TcpConnectionPtr& conn ) ; 
+
+    void reset() ;  // 将所有的人的状态都修改为下线。
 
 private:
 
@@ -46,8 +55,16 @@ private:
     
     // 存储消息id和其对应的业务处理方法
     unordered_map<int , MsgHandler> _msgHandlerMap ; 
-    
+
+    // 用于实现集群聊天服务器的互通有无
+    unordered_map<int, TcpConnectionPtr > _connMap ; // tcpid -> TcpConnectionPtr ，
+
+    mutex  _connMutex ;      
+
     UserModel _userModel ; 
+
+    OfflineMessageModel _offlineMessageModel ; 
+
 
 } ; 
 
