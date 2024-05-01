@@ -18,16 +18,30 @@ public:
         this->_password = pwd ; 
         this->_state = stat ; 
     }
-    void setId(int id ) ; 
-    void setName(std::string name ) ; 
-    void setPwd(std::string password ) ; 
-    void setState(std::string stat) ; 
-
-    int getId() ; 
-    std::string getName() ; 
-    std::string getPwd() ; 
-    std::string getState() ; 
-
+    void setId(int id ) {
+        this->_id = id ; 
+    } 
+    void setName(std::string name )  {
+        this->_name = name ; 
+    }
+    void setPwd(std::string password ) {
+        this->_password = password ; 
+    }
+    void setState(std::string stat) {
+        this->_state = stat ; 
+    }
+    int getId() {
+        return this->_id ; 
+    }
+    std::string getName() {
+        return this->_name ; 
+    }
+    std::string getPwd() {
+        return this->_password ; 
+    }   
+    std::string getState() {
+        return this->_state ; 
+    }
 private:
     int _id ; 
     std::string _name ;

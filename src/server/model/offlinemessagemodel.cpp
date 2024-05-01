@@ -1,4 +1,4 @@
-#include "offlinemessagemodel.h"
+#include "offlinemessagemodel.hpp"
 #include "db.h"
 
 

@@ -6,7 +6,10 @@
 #include <muduo/net/TcpConnection.h>
 #include "json.hpp"
 #include "public.hpp"
-#include "offlinemessagemodel.h"
+#include "offlinemessagemodel.hpp"
+#include "addfriendmodel.hpp"
+#include "groupmodel.hpp"
+
 #include <muduo/base/Logging.h>
 #include <usermodel.hpp>
 #include <memory>
@@ -46,7 +49,18 @@ public:
 
     void clientCloseException(const TcpConnectionPtr& conn ) ; 
 
+
     void reset() ;  // 将所有的人的状态都修改为下线。
+
+    void addFriend(const TcpConnectionPtr& conn , json& js , Timestamp time) ; 
+
+    void createGroup(const TcpConnectionPtr& conn , json& js , Timestamp time) ; 
+
+    void addGroup(const TcpConnectionPtr& conn , json& js , Timestamp time) ; 
+
+    void groupChat(const TcpConnectionPtr& conn , json& js , Timestamp time)  ; 
+
+
 
 private:
 
@@ -61,10 +75,11 @@ private:
 
     mutex  _connMutex ;      
 
+
     UserModel _userModel ; 
-
     OfflineMessageModel _offlineMessageModel ; 
-
+    addFriendModel _addFriendModel ; 
+    GroupModel _groupModel ; 
 
 } ; 
 
