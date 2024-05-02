@@ -13,7 +13,7 @@ enum EnMsgType {
     ONE_CHAT_MSG ,   // 聊天的消息类型
     ADD_FRIEND_MSG , 
 
-    CREATE_GROUP_MSG , 
+    CREATE_GROUP_MSG ,   // 7 
     ADD_GROUP_MSG , 
     GROUP_CHAT_MSG , 
 } ; 

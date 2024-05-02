@@ -1,6 +1,7 @@
 #include "db.h"
 #include <muduo/base/Logging.h>
 #include <string> 
+#include <iostream>
 static std::string server = "127.0.0.1" ; 
 static std::string user = "root" ;
 static std::string password = "123456" ; 
@@ -26,6 +27,7 @@ bool MySQL::connect() {
         LOG_INFO << "connection mysql database sucess!" ; 
     } else {
         LOG_INFO << __FILE__ << ":" << __LINE__ << ":" << "连接失败，请稍后重试" ; 
+        std::cerr << mysql_error(_conn) << std::endl ; 
     }
     return p ; 
 }

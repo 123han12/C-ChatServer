@@ -78,23 +78,21 @@ std::vector<Group> GroupModel::queryGroups(int userid ){
          , groupid 
         ) ; 
         
-        if(mysql.connect() ) {
-            MYSQL_RES* res = mysql.query(std::string(sql) ) ; 
-            if(res != nullptr ) {
-                MYSQL_ROW row ;
+        MYSQL_RES* res = mysql.query(std::string(sql) ) ; 
+        if(res != nullptr ) {
+            MYSQL_ROW row ;
 
-                std::vector<GroupUser>& userVec = group.getUsers() ;   
-                while((row = mysql_fetch_row(res) ) ) {
-                    GroupUser user ; 
-                    user.setId(atoi(row[0] ) ) ; 
-                    user.setName(row[1] ) ; 
-                    user.setState(row[2] ) ; 
-                    user.setRole(row[3] ) ;  
+            std::vector<GroupUser>& userVec = group.getUsers() ;   
+            while((row = mysql_fetch_row(res) ) ) {
+                GroupUser user ; 
+                user.setId(atoi(row[0] ) ) ; 
+                user.setName(row[1] ) ; 
+                user.setState(row[2] ) ; 
+                user.setRole(row[3] ) ;  
 
-                    userVec.push_back(user) ; 
-                }
-                mysql_free_result(res) ; 
+                userVec.push_back(user) ; 
             }
+            mysql_free_result(res) ; 
         }
     
     }   

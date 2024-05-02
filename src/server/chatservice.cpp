@@ -42,8 +42,6 @@ void ChatService::login(const TcpConnectionPtr& conn , json& js , Timestamp time
             response["errmsg"] = "user aleary online , please attempt next time" ; 
             conn->send(response.dump()) ; 
         }else {
-            
-            
             {
                 lock_guard<mutex> lock(_connMutex) ;  // 这种对象构造的时候加锁，析构的时候解锁 
                 _connMap.insert(make_pair(id , conn) ) ;  //在线程互斥的情况下将其进行插入 
@@ -54,7 +52,8 @@ void ChatService::login(const TcpConnectionPtr& conn , json& js , Timestamp time
             json response ; 
             response["msgid"] = LOGIN_MSG_ACk ; 
             response["error"] = 0 ; 
-            response["errmsg"] = "login sucess!" ; 
+            response["userid"] = user.getId() ; 
+            response["username"] = user.getName() ; 
 
             // 从离线表中取出这个对象的所有离线的消息
             std::vector<std::string> vec = _offlineMessageModel.query(id) ; 
@@ -77,6 +76,32 @@ void ChatService::login(const TcpConnectionPtr& conn , json& js , Timestamp time
                 }
                 response["friends"] = strUserList ;  
             }
+
+            // 添加返回用户的群组列表的信息
+            std::vector<Group> groupVec = _groupModel.queryGroups(id) ; 
+            if(!groupVec.empty()) {
+                std::vector<std::string> groupV ; 
+                for(Group & group : groupVec) {
+                    json groupjs ; 
+                    
+                    groupjs["id"] = group.getId() ; 
+                    groupjs["groupname"] = group.getGroupname() ; 
+                    groupjs["groupdesc"] = group.getGroupdesc() ; 
+                    std::vector<std::string> userVec ;
+                    
+                    for(GroupUser& user : group.getUsers() ) {
+                        json userjs ; 
+                        userjs["id"] = user.getId() ; 
+                        userjs["name"] = user.getName() ; 
+                        userjs["state"] = user.getState() ;
+                        userjs["role"]  = user.getState() ; 
+                        userVec.push_back(userjs.dump() ) ; 
+                    }
+                    groupjs["users"] = userVec ; 
+                    groupV.push_back(groupjs.dump() ) ; 
+                }
+                response["groups"] = groupV ; 
+            } 
 
             conn->send(response.dump()) ; 
         }
