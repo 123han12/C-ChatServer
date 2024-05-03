@@ -7,6 +7,7 @@
 
 enum EnMsgType {
     LOGIN_MSG = 1 , 
+    LOGINOUT_MSG , 
     REG_MSG , 
     REG_MSG_ACK ,  // 注册成功的响应消息
     LOGIN_MSG_ACk, 

@@ -60,7 +60,7 @@ public:
 
     void groupChat(const TcpConnectionPtr& conn , json& js , Timestamp time)  ; 
 
-
+    void loginout(const TcpConnectionPtr& conn , json& js , Timestamp time) ; 
 
 private:
 

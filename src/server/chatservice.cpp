@@ -25,7 +25,7 @@ ChatService::ChatService() {
     _msgHandlerMap.insert({CREATE_GROUP_MSG , bind(&ChatService::createGroup , this , _1 , _2 , _3 ) } ) ;
     _msgHandlerMap.insert({ADD_GROUP_MSG , bind(&ChatService::addGroup , this , _1 , _2 , _3 ) } ) ;
     _msgHandlerMap.insert({GROUP_CHAT_MSG , bind(&ChatService::groupChat , this , _1 , _2 , _3 ) } ) ;
-
+    _msgHandlerMap.insert({LOGINOUT_MSG , bind(&ChatService::loginout , this , _1 , _2 , _3 ) } ) ;
 }
 
 
@@ -250,4 +250,23 @@ void ChatService::groupChat(const TcpConnectionPtr& conn , json& js , Timestamp 
         }
     }
     
+}
+
+
+void ChatService::loginout(const TcpConnectionPtr& conn , json& js , Timestamp time){
+    int id = js["id"].get<int>() ; // 得到想要退出的用户的id
+    
+    {
+        lock_guard<mutex> lock(_connMutex) ; 
+        auto iter = _connMap.find(id) ; 
+        if(iter != _connMap.end() ) {
+            _connMap.erase(iter) ; 
+        }
+    }
+
+    User user ; 
+    user.setId(id) ; 
+    user.setState("offline") ; 
+    _userModel.updateState(user);  // 修改其状态为下线
+
 }
