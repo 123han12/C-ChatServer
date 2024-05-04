@@ -10,12 +10,18 @@ void resethandler(int arg){
 
 int main(int argc , char** argv ) {
 
+    if(argc < 3 ) {
+        std::cout << "please entry  ./a.out  ip  port" << std::endl ; 
+        return 0 ; 
+    }
+    char* ip = argv[1] ; 
+    char* port = argv[2] ;
     // 修改默认的处理动作
     signal(SIGINT , resethandler) ; 
     signal(SIGABRT , resethandler) ;     
 
     EventLoop loop ; 
-    InetAddress addr("127.0.0.1" , 9527) ; 
+    InetAddress addr(ip , atoi(port) ) ; 
     ChatServer server(&loop , addr , "ChatServer" ) ; 
 
     server.start() ;
