@@ -9,6 +9,8 @@
 #include "offlinemessagemodel.hpp"
 #include "addfriendmodel.hpp"
 #include "groupmodel.hpp"
+#include "redis.hpp" 
+
 
 #include <muduo/base/Logging.h>
 #include <usermodel.hpp>
@@ -62,6 +64,8 @@ public:
 
     void loginout(const TcpConnectionPtr& conn , json& js , Timestamp time) ; 
 
+    void handleRedisSubscribeMessage(int channel  , std::string message ) ; 
+
 private:
 
     ChatService() ; 
@@ -80,6 +84,8 @@ private:
     OfflineMessageModel _offlineMessageModel ; 
     addFriendModel _addFriendModel ; 
     GroupModel _groupModel ; 
+
+    Redis _redis ; 
 
 } ; 
 

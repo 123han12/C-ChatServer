@@ -1,4 +1,5 @@
 #include "chatservice.hpp"
+#include "redis.hpp"
 #include "public.hpp"
 #include <vector>
 #include <string>
@@ -26,6 +27,15 @@ ChatService::ChatService() {
     _msgHandlerMap.insert({ADD_GROUP_MSG , bind(&ChatService::addGroup , this , _1 , _2 , _3 ) } ) ;
     _msgHandlerMap.insert({GROUP_CHAT_MSG , bind(&ChatService::groupChat , this , _1 , _2 , _3 ) } ) ;
     _msgHandlerMap.insert({LOGINOUT_MSG , bind(&ChatService::loginout , this , _1 , _2 , _3 ) } ) ;
+
+
+        // 连接redis服务器
+    if (_redis.connect())
+    {
+        // 设置上报消息的回调
+        _redis.init_notify_handler(bind(&ChatService::handleRedisSubscribeMessage, this, _1, _2));
+    }
+
 }
 
 
@@ -46,6 +56,11 @@ void ChatService::login(const TcpConnectionPtr& conn , json& js , Timestamp time
                 lock_guard<mutex> lock(_connMutex) ;  // 这种对象构造的时候加锁，析构的时候解锁 
                 _connMap.insert(make_pair(id , conn) ) ;  //在线程互斥的情况下将其进行插入 
             }
+
+
+            // 登录成功之后，就需要开启响应的订阅
+            _redis.subscribe(id) ; 
+
 
             user.setState(std::string("online")) ; 
             _userModel.updateState(user) ;  // 更新这个用户的状态 
@@ -168,6 +183,8 @@ void ChatService::clientCloseException(const TcpConnectionPtr& conn ) {
             }
         }
     } 
+     // 取消异常退出的客户的订阅
+    _redis.unsubscribe(user.getId() ) ;  
 
     // 更新数据库状态
     user.setState(std::string("offline"));
@@ -188,8 +205,14 @@ void ChatService::OneChat(const TcpConnectionPtr& conn , json& js , Timestamp ti
         }
     }
 
-    // 如果对端处于离线状态，则先将信息存储到离线表中(此时先不考虑集群的情景)
-    _offlineMessageModel.insert(toid , js.dump() ) ; 
+    // 查询 toid是否在线
+    User user = _userModel.query(toid) ; 
+    if(user.getState() == "online") {
+        _redis.publish(toid , js.dump() ) ; 
+    }else {
+         // 如果对端处于离线状态，则先将信息存储到离线表中(此时先不考虑集群的情景)
+        _offlineMessageModel.insert(toid , js.dump() ) ; 
+    }
 }
 
 
@@ -245,7 +268,13 @@ void ChatService::groupChat(const TcpConnectionPtr& conn , json& js , Timestamp 
             if(iter != _connMap.end() ) {
                 iter->second->send(js.dump() ) ; 
             } else {  // 如果群组中的其他成员此时不在线，则将其存储在离线消息表中
-                _offlineMessageModel.insert(userid , js.dump() ) ; 
+
+                User user = _userModel.query(userid) ; 
+                if(user.getState() == "online" ) {
+                    _redis.publish(userid , js.dump() ) ; 
+                }else {
+                    _offlineMessageModel.insert(userid , js.dump() ) ; 
+                } 
             }
         }
     }
@@ -264,9 +293,41 @@ void ChatService::loginout(const TcpConnectionPtr& conn , json& js , Timestamp t
         }
     }
 
+    // 取消订阅
+    _redis.unsubscribe(id) ; 
+
+
     User user ; 
     user.setId(id) ; 
     user.setState("offline") ; 
     _userModel.updateState(user);  // 修改其状态为下线
 
 }
+
+// 处理 redis消息队列中发送给在当前服务器登录的客户端的消息
+void ChatService::handleRedisSubscribeMessage(int userid , std::string message ) {
+
+    lock_guard<mutex> lock(_connMutex);
+    auto it = _connMap.find(userid);
+    if (it != _connMap.end() ) 
+    {
+        it->second->send(message) ;
+        return;
+    }
+
+    // 存储该用户的离线消息
+    _offlineMessageModel.insert(userid , message) ; 
+}
+
+
+
+
+/*
+需要思考的问题
+offlinemesage 如何进行同步， nginx 中的 ip_hash 可以解决这个问题吗？？？？
+
+一个客户端两次登录一定是在同一个服务器上吗？如何解决这个问题
+
+多个服务器的 user 表的状态如何进行同步，当前客户端如何获知另一个客户端是否是online状态,这里绝壁有问题
+
+*/
