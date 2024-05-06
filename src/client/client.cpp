@@ -12,6 +12,8 @@
 #include <unordered_map>
 #include <functional>
 #include <ctime>
+#include <semaphore.h>
+#include <atomic>
 
 #include <iostream>
 #include <sys/socket.h>
@@ -23,6 +25,9 @@
 User globalCurrUser ; // 记录在当前客户端登录的用户的信息
 std::vector<Group> globalCurrUserGroups; // 记录群聊组
 std::vector<User>  globalCurrUserFriends; // 当前用户的好友列表
+std::atomic<bool>  globalIsLoginSucess{false} ;  
+std::atomic<bool>  globalIsRegisterSucess{false} ; 
+sem_t rwsem ; 
 
 bool LOGINOUT  = true ;  // 为true 表示此时没有用户登录，为false 表示此时有用户登录  
 
@@ -62,29 +67,130 @@ void showCurrUserData() {
     std::cout << "===========================================================" << std::endl ;     
 }
 
+void doLoginResponse(nlohmann::json& response) {
+    int error = response["error"].get<int>() ; 
+    if(error == -1 ) { // 登录失败。
+        std::cerr << response["errmsg"] << std::endl ; 
+        globalIsLoginSucess = false ; 
+    } else if(error == 0 ) { // 登录成功
+        // 设置全局变量
+        globalCurrUser.setId(response["userid"].get<int>() ) ; 
+        globalCurrUser.setName(response["username"].get<std::string>() ) ; 
+        
+        std::cout << globalCurrUser.getName() << "  login sucess" << std::endl ; 
+        
+        // 记录好友列表信息
+        if(response.contains("friends") ) {
+            globalCurrUserFriends.clear() ; 
+            std::vector<std::string> userList = response["friends"] ; 
+
+            for(auto& strjs : userList ) {
+                nlohmann::json userjs = nlohmann::json::parse(strjs) ; 
+                User friends ;
+                friends.setId(userjs["id"].get<int>() ) ; 
+                friends.setName(userjs["name"].get<std::string>() ) ; 
+                friends.setState(userjs["state"].get<std::string>()) ;   
+                globalCurrUserFriends.push_back(friends) ; 
+            }
+
+        } 
+        // 记录当前用户的群组信息
+        if(response.contains("groups")) {
+            globalCurrUserGroups.clear() ;
+            std::vector<std::string> groupV = response["groups"] ; 
+            for(auto& groupstr : groupV ) {
+                nlohmann::json groupjs = nlohmann::json::parse(groupstr) ; 
+                Group group ; 
+                group.setId(groupjs["id"].get<int>() ) ; 
+                group.setGroupname(groupjs["groupname"]) ; 
+                group.setGroupDesc(groupjs["groupdesc"]) ; 
+
+                std::vector<std::string> userStrList = groupjs["users"] ; 
+                for(auto& userStr : userStrList ) {
+                    nlohmann::json userjs = nlohmann::json::parse(userStr) ; 
+                    GroupUser user ; 
+                    user.setId(userjs["id"].get<int>() ) ; 
+                    user.setName(userjs["name"] ) ; 
+                    user.setState(userjs["state"] );
+                    user.setRole(userjs["role"] ) ; 
+
+                    group.getUsers().push_back(user) ; 
+                }
+
+                globalCurrUserGroups.push_back(group) ; 
+            }
+        }
+        showCurrUserData() ; 
+        
+        // 显示当前用户的离线消息
+        if(response.contains("offlinemsg")) {
+            std::vector<std::string> offlinemsgvec = response["offlinemsg"] ; 
+            for(auto& offlinemsg : offlinemsgvec ) {
+
+                nlohmann::json js = nlohmann::json::parse(offlinemsg) ; 
+                
+                if(ONE_CHAT_MSG == js["msgid"].get<int>() ) {
+                
+                    std::cout << js["time"].get<std::string>() << "[" << js["id"] << "]" << 
+                    js["name"].get<std::string>() << " said: " << js["msg"] << std::endl ; 
+                
+                }else if(GROUP_CHAT_MSG == js["msgid"].get<int>() ) { // 如果是一个群组消息的话
+                
+                    std::cout << js["time"].get<std::string>() << "group[" << js["groupid"] << "]message" << "[" << js["id"] << "]" << 
+                    js["name"].get<std::string>() << " said: " << js["msg"] << std::endl ; 
+                
+                }
+            }
+        }
+        globalIsLoginSucess = true ;  // 表示登录成功
+    }
+
+}
+
+void doRegisterResponse(nlohmann::json& response ) {
+    int err = response["error"].get<int>() ; 
+    if(err == -1 ) { // 注册失败
+        std::cerr << response["errmsg"] << std::endl ; 
+        globalIsRegisterSucess = false ;  
+    }else { // 注册成功
+        std::cout << "register sucess you id is:" << response["id"].get<int>() << std::endl ; 
+        globalIsRegisterSucess = true ; 
+    }
+}
+
 // 用于接受远端的数据，读
 void readTaskHandler(int clientfd ) {
     for(; ; ) {
-        char buffer[1024] = {'\0'} ;
+        char buffer[4096] = {'\0'} ;
 
-        int len = recv(clientfd , buffer , 1024 , 0 ) ;  
+        int len = recv(clientfd , buffer , 4096 , 0 ) ;  
         if(len == -1 || len == 0 ) {
             close(clientfd) ; 
             std::cout << "readTaskHnadler  recv function error" << std::endl ; 
             exit(-1) ; 
         }
+        // std::cout << "收到一个登录的回复消息,json字符串是:" << buffer << std::endl ; 
         nlohmann::json js = nlohmann::json::parse(buffer) ; 
         if(ONE_CHAT_MSG == js["msgid"].get<int>() ) {
             std::cout << js["time"].get<std::string>() << "\n[" << js["id"] << "]" << 
             js["name"].get<std::string>() << " said: " << js["msg"] << std::endl ; 
-        }else if(GROUP_CHAT_MSG == js["msgid"].get<int>() ) { // 如果是一个群组消息的话
+        }
+        else if(GROUP_CHAT_MSG == js["msgid"].get<int>() ) { // 如果是一个群组消息的话
+        
             std::cout << js["time"].get<std::string>() << "\ngroup[" << js["groupid"] << "]message" << "[" << js["id"] << "]" << 
             js["name"].get<std::string>() << " said: " << js["msg"] << std::endl ; 
+        
+        }
+        else if(js["msgid"].get<int>() == LOGIN_MSG_ACk) { // 接受到的消息为  登录的回复消息
+            doLoginResponse(js) ; 
+            sem_post(&rwsem) ; 
+        }   
+        else if(js["msgid"].get<int>() == REG_MSG_ACK ) {  // 接受到的消息为  注册的回复消息
+            doRegisterResponse(js) ;  
+            sem_post(&rwsem) ; 
         }
     }
 }
-
-
 
 // 一系列的命令处理函数
 void help(int a = 0 , std::string = "" ) ; 
@@ -167,6 +273,13 @@ int main(int argc , char** argv ) {
     } 
     std::cout << "connection sucess!" << std::endl ; 
 
+
+    sem_init(&rwsem , 0 , 0 ) ; 
+
+    // 启动子线程，做一个接受消息的操作
+    std::thread readTask(readTaskHandler , clientfd ) ;                                 
+    readTask.detach() ;
+
     for(; ; ){
         showmenu() ; 
 
@@ -193,25 +306,12 @@ int main(int argc , char** argv ) {
                     int ret = send(clientfd , request.c_str() , strlen(request.c_str()) + 1 , 0 ) ; 
                     if(ret == -1 ) { // 发送失败
                         std::cerr << "send register message error" << std::endl ; 
-                    } else {    // 发送成功 , 接受服务端发送的信息
-                        char buffer[1024] = {0} ; 
-                        int len = recv(clientfd , buffer , 1024 , 0 ) ; 
-                        if(len == -1 ) { // 读取失败
-                            std::cerr << "recv response msg error" << std::endl ; 
-                        } else { // 读取成功
-                            std::cout << "recv response sucess!" << std::endl ; 
-                            nlohmann::json response = nlohmann::json::parse(buffer) ;  // 反序列话数据
-                            std::cout << "parse response sucess!" << std::endl ;
-                            int err = response["error"].get<int>() ; 
-                            if(err == -1 ) { // 注册失败
-                                std::cerr << response["errmsg"] << std::endl ;  
-                            }else { // 注册成功
-                                std::cout << "register sucess you id is:" << response["id"].get<int>() << std::endl ; 
-                            }
-                        }
                     }
-                    break ; 
+
+                    sem_wait(&rwsem) ; 
+                    globalIsRegisterSucess = false ; 
                 } 
+                break ; 
             case 2:  // 处理登录业务 , 一旦进行登录，这里就需要进行一些多线程的处理
                 {
                     int id = -1 ; 
@@ -229,107 +329,22 @@ int main(int argc , char** argv ) {
                     std::string request = js.dump() ; // 序列化为字符串
                     
                     int ret = send(clientfd , request.c_str() , strlen(request.c_str()) + 1 , 0 ) ; 
+
                     if(ret == -1 ){ // 这里表示发送失败
                         std::cerr << "send login message error" << std::endl ; 
-                    }else { //这里表示发送成功，需要接受数据
-                        char buffer[BUFSIZ] = {'\0'}; 
-                        
-                        int len = recv(clientfd , buffer , BUFSIZ , 0 ) ; 
-                        if(len == -1 ) {
-                            std::cerr << "recv login message error " << std::endl ;
-                        }else {
-                            std::cerr << "recv login message sucess!" << std::endl ; 
-                            
-                            nlohmann::json response = nlohmann::json::parse(buffer) ; // 解析出json对象
-                            int error = response["error"].get<int>() ; 
-                            if(error == -1 ) { // 登录失败。
-                                std::cerr << response["errmsg"] << std::endl ; 
-                            } else if(error == 0 ) { // 登录成功
-                                // 设置全局变量
-                                globalCurrUser.setId(response["userid"].get<int>() ) ; 
-                                globalCurrUser.setName(response["username"].get<std::string>() ) ; 
-                                
-                                std::cout << globalCurrUser.getName() << "  login sucess" << std::endl ; 
-                                
-                                // 记录好友列表信息
-                                if(response.contains("friends") ) {
-                                    globalCurrUserFriends.clear() ; 
-                                    std::vector<std::string> userList = response["friends"] ; 
-
-                                    for(auto& strjs : userList ) {
-                                        nlohmann::json userjs = nlohmann::json::parse(strjs) ; 
-                                        User friends ;
-                                        friends.setId(userjs["id"].get<int>() ) ; 
-                                        friends.setName(userjs["name"].get<std::string>() ) ; 
-                                        friends.setState(userjs["state"].get<std::string>()) ;   
-                                        globalCurrUserFriends.push_back(friends) ; 
-                                    }
-
-                                } 
-                                // 记录当前用户的群组信息
-                                if(response.contains("groups")) {
-                                    globalCurrUserGroups.clear() ;
-                                    std::vector<std::string> groupV = response["groups"] ; 
-                                    for(auto& groupstr : groupV ) {
-                                        nlohmann::json groupjs = nlohmann::json::parse(groupstr) ; 
-                                        Group group ; 
-                                        group.setId(groupjs["id"].get<int>() ) ; 
-                                        group.setGroupname(groupjs["groupname"]) ; 
-                                        group.setGroupDesc(groupjs["groupdesc"]) ; 
-
-                                        std::vector<std::string> userStrList = groupjs["users"] ; 
-                                        for(auto& userStr : userStrList ) {
-                                            nlohmann::json userjs = nlohmann::json::parse(userStr) ; 
-                                            GroupUser user ; 
-                                            user.setId(userjs["id"].get<int>() ) ; 
-                                            user.setName(userjs["name"] ) ; 
-                                            user.setState(userjs["state"] );
-                                            user.setRole(userjs["role"] ) ; 
-
-                                            group.getUsers().push_back(user) ; 
-                                        }
-
-                                        globalCurrUserGroups.push_back(group) ; 
-                                    }
-                                }
-                                showCurrUserData() ; 
-                                
-                                // 显示当前用户的离线消息
-                                if(response.contains("offlinemsg")) {
-                                    std::vector<std::string> offlinemsgvec = response["offlinemsg"] ; 
-                                    for(auto& offlinemsg : offlinemsgvec ) {
-
-                                        nlohmann::json js = nlohmann::json::parse(offlinemsg) ; 
-                                        
-                                        if(ONE_CHAT_MSG == js["msgid"].get<int>() ) {
-                                       
-                                            std::cout << js["time"].get<std::string>() << "[" << js["id"] << "]" << 
-                                            js["name"].get<std::string>() << " said: " << js["msg"] << std::endl ; 
-                                       
-                                        }else if(GROUP_CHAT_MSG == js["msgid"].get<int>() ) { // 如果是一个群组消息的话
-                                       
-                                            std::cout << js["time"].get<std::string>() << "group[" << js["groupid"] << "]message" << "[" << js["id"] << "]" << 
-                                            js["name"].get<std::string>() << " said: " << js["msg"] << std::endl ; 
-                                       
-                                        }
-
-                                    }
-                                }
-                                LOGINOUT = false ;  
-                                static int control = 0 ;  // 控制该程序一定只会创建一个新的线程
-                                if(control == 0 ) {
-                                    std::thread readTask(readTaskHandler , clientfd ) ; 
-                                    readTask.detach() ;
-                                    control ++ ;  
-                                }
-                                mainMenu(clientfd) ; // 进入主聊天页面，主要用来发送数据
-                            } 
-                        }
                     }
 
+                    sem_wait(&rwsem) ; 
+                    if(globalIsLoginSucess) {
+                        LOGINOUT = false ;  
+                        mainMenu(clientfd) ; // 进入主聊天页面，主要用来发送数据
+                    }
+                    globalIsLoginSucess = false ;
                 }
                 break ; 
             case 3:
+                close(clientfd) ; 
+                sem_destroy(&rwsem) ; 
                 exit(0) ; 
             default:
                 std::cout << "input error please try again" << std::endl ; 
@@ -338,7 +353,6 @@ int main(int argc , char** argv ) {
 
     }
 
-    return 0 ; 
 }
 
 

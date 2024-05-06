@@ -322,12 +322,3 @@ void ChatService::handleRedisSubscribeMessage(int userid , std::string message )
 
 
 
-/*
-需要思考的问题
-offlinemesage 如何进行同步， nginx 中的 ip_hash 可以解决这个问题吗？？？？
-
-一个客户端两次登录一定是在同一个服务器上吗？如何解决这个问题,使用ip_hash 一致性哈希算法
-
-多个服务器的 user 表的状态如何进行同步，当前客户端如何获知另一个客户端是否是online状态,这里绝壁有问题, 可以多个集群服务器连接同一个数据库解决这个问题
-
-*/
