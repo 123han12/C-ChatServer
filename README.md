@@ -19,6 +19,9 @@ offlinemesage 如何进行同步， nginx 中的 ip_hash 可以解决这个问�
 4. muduo网络库的编译与安装
 5. nginx + tcp 负载均衡模块
 6. redis 数据库
+7. boost 
+8. make 命令
+
 
 在脚本中执行以上工作之后, 编译项目，如果编译成功，说明脚本没得问题，如果编译失败，说明脚本有问题。
 

@@ -6,5 +6,5 @@ update user set host = '%' where user = 'root';
 #刷新cache中配置
 flush privileges;
 select host, user from user;
-ALTER USER 'root'@'%' IDENTIFIED WITH MYSQL_NATIVE_PASSWORD BY 'hsa101610'    
+ALTER USER 'root'@'%' IDENTIFIED WITH MYSQL_NATIVE_PASSWORD BY 'hsa101610' ; 
 exit

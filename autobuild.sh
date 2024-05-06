@@ -30,9 +30,6 @@ sudo mysql_secure_installation
 # 按照自己的喜爱进行选择
 
 echo "自己配置mysql的用户"
-sudo mysql   #登录 mysql, 因为初始的时候root 用户是以auto_sockt 验证的，所以可以直接登录 
-
-
 # 配置mysql的基本信息
 sudo mysql < ./thirdparty/config.sql
 
@@ -62,27 +59,31 @@ mysql -u $username -p$password < ./thirdparty/table.sql
 echo "MYSQL数据库已经安装好了,并且项目所需的mysql中的表结构也已经配置.......\n"
 
 
+
 # 安装 boost 库
 # 创建临时目录
-mkdir -p /tmp/boost_install
-cd /tmp/boost_install
+sudo mkdir -p /tmp/boost_install
+sudo cd /tmp/boost_install
 
 # 下载Boost源码库
-wget $BOOST_URL
-tar -xzf boost_1_85_0.tar.gz
+sudo wget  https://boostorg.jfrog.io/artifactory/main/release/1.85.0/source/boost_1_85_0.tar.gz
+sudo tar -xzf boost_1_85_0.tar.gz
 
 # 进入Boost源码目录
-cd boost_1_85_0
+sudo cd boost_1_85_0
 
 # 配置Boost编译选项
-./bootstrap.sh --prefix=/usr/local
+sudo ./bootstrap.sh --prefix=/usr/local
 
 # 编译Boost
-./b2 install
+sudo ./b2 install
+
 
 # 清理临时目录
-cd /tmp
-rm -rf /tmp/boost_install
+sudo cd /tmp
+sudo rm -rf /tmp/boost_install
+
+
 
 
 # 定义muduo库的下载地址和版本号
@@ -115,17 +116,45 @@ echo "muduo库已成功下载、编译并安装"
 
 
 
+# 安装 nginx + tcp 负载均衡模块
+sudo mkdir -p /tmp/nginx_install
+cd  /tmp/nginx_install 
 
 
+# 安装编译依赖
+apt-get install -y gcc make libpcre3 libpcre3-dev openssl zlib1g zlib1g-dev libgd-dev libgdal-dev 
+
+# 下载nginx 源码
+wget https://nginx.org/download/nginx-1.22.1.tar.gz
+
+# 解压源代码并进入目录
+tar -zxvf nginx-1.22.1.tar.gz
+
+#进入下载好的nginx源码目录
+cd nginx-1.22.1
+
+# 配置编译选项
+./configure --with-stream --prefix=/usr/local/nginx 
+
+# 编译和安装
+make && make install
+
+# 启动 Nginx 服务
+cd /usr/local/nginx/sbin
+./nginx
+
+# 清理临时目录
+cd /tmp/
+sudo rm -rf /tmp/nginx_install 
+
+# 验证安装
+echo "Nginx 安装完成" 
 
 set -x
 
+
+mkdir ./build
 rm -rf `pwd`/build/*
 cd `pwd`/build &&
 	cmake .. &&
 	make
-
-
-#  /etc/mysql/
-#
-#
