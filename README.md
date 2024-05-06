@@ -1,15 +1,5 @@
 # CppChatServer
-工作在nginx tcp负载均衡环境中的集群聊天服务器和客户端源码 基于muduo实现
 
-
-/*
-需要思考的问题
-offlinemesage 如何进行同步， nginx 中的 ip_hash 可以解决这个问题吗？？？？
-
-一个客户端两次登录一定是在同一个服务器上吗？如何解决这个问题,使用ip_hash 一致性哈希算法
-
-多个服务器的 user 表的状态如何进行同步，当前客户端如何获知另一个客户端是否是online状态,这里绝壁有问题, 可以多个集群服务器连接同一个数据库解决这个问题
-*/ 
 
 如何添加脚本，从而在一台环境未配置或部分配置的linux机器上，当从github拉取该项目之后，执行该脚本，就直接将项目所依赖的环境，以及项目直接编译完成
 项目所依赖的环境如下:
@@ -21,12 +11,40 @@ offlinemesage 如何进行同步， nginx 中的 ip_hash 可以解决这个问�
 6. redis 数据库
 7. boost 
 8. make 命令
+9. 安装hiredis 开发包
 
 
-在脚本中执行以上工作之后, 编译项目，如果编译成功，说明脚本没得问题，如果编译失败，说明脚本有问题。
+在脚本中执行以上工作之后, 编译项目，如果编译成功,本项目的自动脚本可以实现在ubuntu22.04虚拟机上一键编译，其中需要配置mysql数据库的密码，完全凭借自己的喜好，并且自动建立了该项目所需要的表结构。
+
+#####注意，脚本并未配置nginx 的tcp 负载均衡，需要自行配置。编辑`usr/local/nginx/conf/nginx.cnf`文件 ，下面给出示例
+```
+stream{
+        upstream MyServer {
+                ip_hash ;   # 使用IP进行哈希计算的负载均衡算法，保证一个客户端多次连接的时候，连接的一定是同一台服务器
+                server 127.0.0.1:6000 weight=1 max_fails=3 fail_timeout=30s;
+                server 127.0.0.1:6002 weight=1 max_fails=3 fail_timeout=30s;
+        #       server www.baidu.com:80;
+        }
+        server{
+                proxy_connect_timeout 1s ;
+                #proxy_timeout 3s;
+                listen 8000 ;
+                proxy_pass MyServer ;
+                tcp_nodelay on;
+        }
+}
+```
+编辑好之后执行:
+```
+cd ../sbin
+./nginx -s reload 
+```
+实现nginx的热启动。
 
 
-###配置集群环境，对该项目进行测试:
+
+配置集群环境，对该项目进行测试:
 1. 使用Ubuntu-22.04镜像 创建4台虚拟机，测试这四台虚拟机能相互通信
 2. 安装git 并且从远程仓库拉取项目 ，执行一键配置脚本，编译项目。
 3. 两台作为聊天服务器集群，两台作为客户端进行通信模拟, 如果通信成功，说明代码没得问题。 
+

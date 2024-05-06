@@ -63,35 +63,33 @@ echo "MYSQL数据库已经安装好了,并且项目所需的mysql中的表结构
 # 安装 boost 库
 # 创建临时目录
 sudo mkdir -p /tmp/boost_install
-sudo cd /tmp/boost_install
+cd /tmp/boost_install
 
 # 下载Boost源码库
 sudo wget  https://boostorg.jfrog.io/artifactory/main/release/1.85.0/source/boost_1_85_0.tar.gz
 sudo tar -xzf boost_1_85_0.tar.gz
 
 # 进入Boost源码目录
-sudo cd boost_1_85_0
+cd boost_1_85_0
 
 # 配置Boost编译选项
-sudo ./bootstrap.sh --prefix=/usr/local
+./bootstrap.sh --prefix=/usr/local
 
 # 编译Boost
-sudo ./b2 install
+./b2 install
 
 
 # 清理临时目录
-sudo cd /tmp
+cd /tmp
 sudo rm -rf /tmp/boost_install
-
-
 
 
 # 定义muduo库的下载地址和版本号
 MUDUO_URL="https://github.com/chenshuo/muduo.git"
 MUDUO_VERSION="master"
 # 创建一个临时目录用于存放源码和编译文件
-TEMP_DIR=$(mktemp -d)
-cd $TEMP_DIR
+sudo mkdir -p /tmp/muduo_install
+sudo cd /tmp/muduo_install
 
 # 下载muduo库的源码
 git clone $MUDUO_URL
@@ -110,7 +108,8 @@ make
 sudo make install
 
 # 清理临时目录
-rm -rf $TEMP_DIR
+cd /tmp/
+sudo rm -rf /tmp/muduo_install
 
 echo "muduo库已成功下载、编译并安装"
 
@@ -150,11 +149,34 @@ sudo rm -rf /tmp/nginx_install
 # 验证安装
 echo "Nginx 安装完成" 
 
+# 安装 hiredis 和 redis 
+sudo apt-get install redis-server
+
+mkdir /tmp/redis_install
+cd /tmp/redis_install
+
+git clone https://github.com/redis/hiredis
+
+cd hiredis
+
+make
+
+sudo make install
+
+sudo ldconfig /usr/local/lib
+
+# 清除暂存目录
+cd /tmp/
+rm -rf /tmp/redis_install
+
+
+
 set -x
 
-
-mkdir ./build
-rm -rf `pwd`/build/*
-cd `pwd`/build &&
+cd /home/hsa/Desktop/CppChatServer/
+mkdir build
+mkdir bin
+rm -rf ./build/*
+cd  ./build &&
 	cmake .. &&
 	make
