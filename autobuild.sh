@@ -140,6 +140,8 @@ make && make install
 
 # 启动 Nginx 服务
 cd /usr/local/nginx/sbin
+
+
 ./nginx
 
 # 清理临时目录
